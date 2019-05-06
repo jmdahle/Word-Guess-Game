@@ -6,20 +6,42 @@ var wordGame = {
     wordList: ["vampire", "zombie", "witch", "ghoul", "ghost"],
     currWord: "",
     maskedWord: "",
+    gameMessage: "Press any letter to start.",
+    guess: "",
+    lettersUsed: " ", // string of all letters used
+    lettersCorrect: "", // string for all CORRECT guesses
     displayLetter: document.getElementById("selectedLetter"),
     displaySolution: document.getElementById("solutionWord"),
     displayMessage: document.getElementById("gameMessage"),
     displayUsed: document.getElementById("usedLetters"),
-    ltrLoc: -1, // variable for location of letter
-    isUsed: false, // boolean for if letter is already used
-    lettersUsed: "", // string of all letters used
-    lettersCorrect: "", // string for all CORRECT guesses
-    guess: "",
 
     setUp: function() {
-        this.displayMessage.innerHTML = "Press any letter to start.";
         this.chooseNewWord();
         this.maskWord();
+        this.updateBoard();
+    },
+
+    updateBoard: function() {
+        this.updateGameMessage(this.gameMessage);
+        this.updateLettersUsed();
+        this.updateSelectedLetter();
+        this.updateSolution();
+    },
+
+    updateGameMessage: function(msg) {
+        this.displayMessage.innerHTML = msg;
+    },
+
+    updateSolution: function() {
+        this.displaySolution.innerHTML = this.maskedWord;
+    },
+
+    updateLettersUsed: function() {
+        this.displayUsed.innerHTML = this.lettersUsed;
+    },
+
+    updateSelectedLetter: function() {
+        this.displayLetter.innerHTML = this.guess;
     },
 
     maskWord: function() {
@@ -35,7 +57,6 @@ var wordGame = {
             }
         }
         this.maskedWord = maskedWordLocal;
-        this.displaySolution.innerHTML = this.maskedWord;
     },
 
     chooseNewWord: function() {
@@ -48,6 +69,35 @@ var wordGame = {
         } else {
             this.currWord = this.wordList.splice(Math.floor(Math.random() * this.wordList.length),1).toString();
         }
+    },
+
+    keyPressed: function (keyPressed) {
+        var isUsed = false;
+        // check if key pressed is a letter
+        if (/[a-z]/i.test(keyPressed) && keyPressed.length === 1) {
+            var guessLoc = keyPressed.toUpperCase();    
+            // check to see if the letter is in the used letter list
+            var n = this.lettersUsed.indexOf(guessLoc);
+            if (n !== -1) {
+                // letter is used
+                isUsed = true;
+                this.GameMessage = "That letter has been used.  Pick a different letter.";
+            } else {
+                isUsed = false;
+                // add letter to used letter list
+                this.lettersUsed = this.lettersUsed + " " + guessLoc;
+            }
+            // check to see if the letter is in the word
+            n = this.currWord.toUpperCase().indexOf(guessLoc);
+            if ((n !== -1) && (!isUsed)) {
+                // letter is in solution and hasn't been used
+                // reveal the letter
+                // create a new "masked" version of the word
+                this.lettersCorrect = this.lettersCorrect + guessLoc;
+                this.maskWord();
+            }
+        }
+        this.updateBoard();
     }
 }
 
@@ -65,5 +115,10 @@ function showVars() {
 wordGame.setUp();
 showVars();
 
-// document.addEventListener('keyup', logKey);
+document.onkeyup = function (event) {
+    keyPressed = event.key;
+    wordGame.keyPressed(keyPressed);
+    showVars();
+}
+
 
