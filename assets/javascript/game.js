@@ -1,15 +1,20 @@
 
 var wordGame = {
-    numberGuesses: 12,
+    playerName: "",
     numberWins: 0,
     numberLosses: 0,
-    wordList: ["vampire", "zombie", "witch", "ghoul", "ghost"],
+    wordList: ["vampire", "zombie", "witch", "ghoul", "ghost", "spooky"],
+    numberGuesses: 12,
     currWord: "",
     maskedWord: "",
     gameMessage: "",
+    gameInstructions: "",
     guess: "",
-    lettersUsed: " ", // string of all letters used
+    lettersUsed: "", // string of all letters used
     lettersCorrect: "", // string for all CORRECT guesses
+    isSolved: false,
+    gameActive: false,
+    displayInstructions: document.getElementById("gameInstructions"),
     displayLetter: document.getElementById("selectedLetter"),
     displaySolution: document.getElementById("solutionWord"),
     displayMessage: document.getElementById("gameMessage"),
@@ -17,24 +22,82 @@ var wordGame = {
     displayGuesses: document.getElementById("guessesRemaining"),
     displayWins: document.getElementById("wins"),
     displayLosses: document.getElementById("losses"),
-    gameStarted: false,
+
+    startGame: function () {
+        this.getPlayerName();
+        this.setUp();
+    },
 
     setUp: function () {
-        this.gameMessage = "Press 'Y' to start or 'Q' to quit.";
+        this.gameActive = true;
+        this.numberGuesses = 12;
+        this.currWord = "";
+        this.maskedWord = "";
+        this.gameMessage = "";
+        this.gameInstructions = "";
+        this.guess = "";
+        this.lettersUsed = "";
+        this.lettersCorrect = "";
+        this.isSolved = false;
         this.chooseNewWord();
         this.maskWord();
+        this.gameInstructions = "Press any letter to make a guess, " + this.playerName + ".";
         this.updateBoard();
+    },
+
+    getPlayerName: function () {
+        this.playerName = prompt("Please enter your name");
+        if (this.playerName == "") { this.playerName = "No Body (get it?)"; }
+        alert("Alright, " + this.playerName + ", let's get started!");
     },
 
     updateBoard: function () {
         this.maskWord();
+        this.updateGameInstructions(this.gameInstructions);
         this.updateGameMessage(this.gameMessage);
         this.updateLettersUsed();
         this.updateSelectedLetter();
         this.updateGuesses();
         this.updateSolution();
-        this.updateWins();
-        this.updateLosses();
+        // win/loss condition is not yet working
+        if (this.isSolved) {
+            // if the word is solved!
+            this.gameMessage = "YOU WIN!!  Way to go, " + this.playerName;
+            this.numberWins++;
+            this.updateWins();
+            this.gameEnd();
+        } else if (this.numberGuesses < 1) {
+            // used all the guesses
+            this.gameMessage = "You lost.  Better luck next time, " + this.playerName;
+            this.numberLosses++;
+            this.updateLosses();
+            this.gameEnd();
+        }
+    },
+
+    gameEnd: function () {
+        var confirmMessage = this.gameMessage + "  You have " + this.numberWins + " wins and " + this.numberLosses + " losses."
+        // if there are no more words left, CONTINUE will need to restart the game; if there are words left, CONTINUE will use a new word
+        if (this.wordList.length < 1) {
+            confirmMessage = confirmMessage + "  You've used up all my words!  Do you want to re-start?  If so, click 'OK.'  'Cancel' will end the game."
+        } else {
+            confirmMessage = confirmMessage + "  Do you want to continue playing with a new word?  If so, click 'OK.'  'Cancel' will end the game."
+        }
+        var continueYN = confirm(confirmMessage);
+        if (!continueYN) {
+            alert("Quitter!");
+            this.quitGame();
+        } else if (this.wordList.length < 1) {
+            alert("Restocking shelves");
+            alert(wordGame.wordList + " | " + this.wordList);
+        } else {
+            alert("Selecting next word...");
+            this.setUp();
+        }
+    },
+
+    quitGame: function () {
+        this.gameActive = false;
     },
 
     updateGuesses: function () {
@@ -53,6 +116,10 @@ var wordGame = {
         this.displayMessage.innerHTML = msg;
     },
 
+    updateGameInstructions: function (msg) {
+        this.displayInstructions.innerHTML = msg;
+    },
+
     updateSolution: function () {
         this.displaySolution.innerHTML = this.maskedWord;
     },
@@ -66,7 +133,8 @@ var wordGame = {
     },
 
     maskWord: function () {
-        maskedWordLocal = "";
+        var maskedWordLocal = "";
+        var numUnsolvedLetters = 0;
         for (var i = 0; i < this.currWord.length; i++) {
             testLetter = this.currWord.substr(i, 1).toUpperCase();
             if (this.lettersCorrect.indexOf(testLetter) !== -1) {
@@ -75,9 +143,12 @@ var wordGame = {
             } else {
                 // the current letter is masked
                 maskedWordLocal = maskedWordLocal + "_ ";
+                numUnsolvedLetters++;
             }
         }
-        this.maskedWord = maskedWordLocal;
+        if (numUnsolvedLetters === 0) { this.isSolved = true; }
+        this.maskedWord = maskedWordLocal.trim();
+
     },
 
     chooseNewWord: function () {
@@ -89,6 +160,7 @@ var wordGame = {
             this.currWord = "";
         } else {
             this.currWord = this.wordList.splice(Math.floor(Math.random() * this.wordList.length), 1).toString();
+            this.isSolved = false;
         }
     },
 
@@ -119,13 +191,11 @@ var wordGame = {
     },
 
     keyPressed: function (keyPressed) {
+
         // check if key pressed is a letter
         if (/[a-z]/i.test(keyPressed) && keyPressed.length === 1) {
             var ltr = keyPressed.toUpperCase();
-// need to add logic for "start" game (Y) or quit (Q)
-// while gameStarted is false (default value)
-// game "restarts" (slect Y or Q) after a win or loss
-// so long as there are still words remaining
+
             // check if the letter is used or results in a correct or wrong guess
             var checkResult = this.checkLetter(ltr);
             console.log(checkResult);
@@ -148,19 +218,9 @@ var wordGame = {
                 this.numberGuesses--;
                 this.gameMessage = "Incorrect guess.";
             }
-// win/loss condition is not yet working
-            if (this.maskWord === this.currWord) {
-                // if the word is solved!
-                this.gameMessage = "YOU WIN!!";
-                numberWins++;
-            } else if (this.numberGuesses < 1) {
-                // used all the guesses
-                this.gameMessage = "You lost.";
-                numberLosses++;
-            }
             this.guess = ltr;
-            this.updateBoard();
         }
+        this.updateBoard();
     }
 }
 
@@ -170,18 +230,22 @@ function showVars() {
         "letters used: " + wordGame.lettersUsed + " | ",
         "masked word: " + wordGame.maskedWord + " | ",
         "current guess: " + wordGame.guess + " | ",
-        "number guesses remain: " + wordGame.numberGuesses + " | "
+        "number guesses remain: " + wordGame.numberGuesses + " | ",
+        "isSolved: " + wordGame.isSolved + " | ",
+        "gameActive: " + wordGame.gameActive + " | "
     );
     console.log("==========");
 }
 
-wordGame.setUp();
+wordGame.startGame();
 showVars();
 
 document.onkeyup = function (event) {
-    keyPressed = event.key;
-    wordGame.keyPressed(keyPressed);
-    showVars();
+    if (wordGame.gameActive) {
+        keyPressed = event.key;
+        wordGame.keyPressed(keyPressed);
+        showVars();
+    }
 }
 
 
