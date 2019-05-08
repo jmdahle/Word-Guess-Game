@@ -3,15 +3,15 @@ var wordGame = {
     playerName: "",
     numberWins: 0,
     numberLosses: 0,
-    wordList: ["vampire", "zombie", "witch", "ghoul", "ghost", "spooky"],
-    numberGuesses: 12,
+    wordList: ["vampire", "zombie", "witch", "ghoul", "ghost", "spooky", "wraith", "spirit", "phantom", "shadow"],
+    numberGuesses: 8,
     currWord: "",
     maskedWord: "",
     gameMessage: "",
-    gameInstructions: "",
-    guess: "",
-    lettersUsed: "", // string of all letters used
-    lettersCorrect: "", // string for all CORRECT guesses
+    gameInstructions: "", 
+    guess: "", 
+    lettersUsed: "", 
+    lettersCorrect: "",
     isSolved: false,
     gameActive: false,
     displayInstructions: document.getElementById("gameInstructions"),
@@ -22,15 +22,19 @@ var wordGame = {
     displayGuesses: document.getElementById("guessesRemaining"),
     displayWins: document.getElementById("wins"),
     displayLosses: document.getElementById("losses"),
+    endGameFlag: false,
 
     startGame: function () {
+        // starts a new game by asking for player name and initializing the game
         this.getPlayerName();
         this.setUp();
     },
 
     setUp: function () {
+        // set up the game with a new word
+        // need to re-set a number of properties
         this.gameActive = true;
-        this.numberGuesses = 12;
+        this.numberGuesses = 8;
         this.currWord = "";
         this.maskedWord = "";
         this.gameMessage = "";
@@ -39,15 +43,18 @@ var wordGame = {
         this.lettersUsed = "";
         this.lettersCorrect = "";
         this.isSolved = false;
+        this.gameInstructions = "Press any letter to make a guess, " + this.playerName + ".";
+        // choose a new word and create a "masked" version of it
         this.chooseNewWord();
         this.maskWord();
-        this.gameInstructions = "Press any letter to make a guess, " + this.playerName + ".";
+        // update the game view
         this.updateBoard();
     },
 
     getPlayerName: function () {
+        // Gets the player name, and provides a default if no name is selected)
         this.playerName = prompt("Please enter your name");
-        if (this.playerName == "") { this.playerName = "No Body (get it?)"; }
+        if (this.playerName == "" || this.playerName == null) { this.playerName = "No Body (get it?)"; }
         alert("Alright, " + this.playerName + ", let's get started!");
     },
 
@@ -59,19 +66,23 @@ var wordGame = {
         this.updateSelectedLetter();
         this.updateGuesses();
         this.updateSolution();
+        this.updateWins();
+        this.updateLosses();
         // win/loss condition is not yet working
         if (this.isSolved) {
             // if the word is solved!
             this.gameMessage = "YOU WIN!!  Way to go, " + this.playerName;
             this.numberWins++;
             this.updateWins();
-            this.gameEnd();
+            // this.gameEnd();
+            this.endGameFlag = true;
         } else if (this.numberGuesses < 1) {
             // used all the guesses
             this.gameMessage = "You lost.  Better luck next time, " + this.playerName;
             this.numberLosses++;
             this.updateLosses();
-            this.gameEnd();
+            // this.gameEnd();
+            this.endGameFlag = true;
         }
     },
 
@@ -94,6 +105,7 @@ var wordGame = {
             alert("Selecting next word...");
             this.setUp();
         }
+        this.endGameFlag = false;
     },
 
     quitGame: function () {
@@ -101,35 +113,35 @@ var wordGame = {
     },
 
     updateGuesses: function () {
-        this.displayGuesses.innerHTML = "Guesses Remaining: " + this.numberGuesses;
+        this.displayGuesses.textContent = "Guesses Remaining: " + this.numberGuesses;
     },
 
     updateWins: function () {
-        this.displayWins.innerHTML = "Wins: " + this.numberWins;
+        this.displayWins.textContent = this.numberWins;
     },
 
     updateLosses: function () {
-        this.displayLosses.innerHTML = "Losses: " + this.numberLosses;
+        this.displayLosses.textContent = this.numberLosses;
     },
 
     updateGameMessage: function (msg) {
-        this.displayMessage.innerHTML = msg;
+        this.displayMessage.textContent = msg;
     },
 
     updateGameInstructions: function (msg) {
-        this.displayInstructions.innerHTML = msg;
+        this.displayInstructions.textContent = msg;
     },
 
     updateSolution: function () {
-        this.displaySolution.innerHTML = this.maskedWord;
+        this.displaySolution.textContent = this.maskedWord;
     },
 
     updateLettersUsed: function () {
-        this.displayUsed.innerHTML = "Letters used: " + this.lettersUsed;
+        this.displayUsed.textContent = "Letters used: " + this.lettersUsed;
     },
 
     updateSelectedLetter: function () {
-        this.displayLetter.innerHTML = "Your last guess: " + this.guess;
+        this.displayLetter.textContent = "Your last guess: " + this.guess;
     },
 
     maskWord: function () {
@@ -232,7 +244,8 @@ function showVars() {
         "current guess: " + wordGame.guess + " | ",
         "number guesses remain: " + wordGame.numberGuesses + " | ",
         "isSolved: " + wordGame.isSolved + " | ",
-        "gameActive: " + wordGame.gameActive + " | "
+        "gameActive: " + wordGame.gameActive + " | ",
+        "endGameFlag: " + wordGame.endGameFlag + " | "
     );
     console.log("==========");
 }
@@ -246,6 +259,15 @@ document.onkeyup = function (event) {
         wordGame.keyPressed(keyPressed);
         showVars();
     }
+    if (wordGame.endGameFlag) {wordGame.gameEnd();}
+    /*
+    JavaScript execution and page rendering are done in the same execution thread, which means that while your code is executing the browser will not be redrawing the page.
+     - from: https://stackoverflow.com/questions/8110905/javascript-a-loop-with-innerhtml-is-not-updating-during-loop-execution
+    */
+
+    /* TRY THIS SOLUTION:
+    Use a Bootstrap MODAL dialog.  The "window" dialog is taking precedence, interrupting the rendering of the page
+    */
 }
 
 
