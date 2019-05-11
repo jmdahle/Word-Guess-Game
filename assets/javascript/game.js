@@ -27,9 +27,9 @@ var wordGame = {
     displayGameBoard: document.getElementsByClassName("gameBoard"),
     displayContinueYN: document.getElementsByClassName("continueYN"),
 
+
     startGame: function () {
         // starts a new game by asking for player name and initializing the game
-        // this.getPlayerName();
         this.playerName =  "";
         this.numberWins = 0;
         this.numberLosses = 0;
@@ -43,8 +43,7 @@ var wordGame = {
         if (this.wordList.length < 1) { 
             this.wordList = ["vampire", "zombie", "witch", "ghoul", "ghost", "spooky", "wraith", "spirit", "phantom", "shadow"];
         }
-        // set up the game with a new word
-        // need to re-set a number of properties
+        // set up the game with defaults
         this.updateDisplayContinueYN("hidden");
         this.gameActive = true;
         this.numberGuesses = 8;
@@ -259,6 +258,7 @@ var wordGame = {
 // start the game immediately
 // calls into wordGame object
 wordGame.startGame();
+
 
 function showVars() {
     // debugger
