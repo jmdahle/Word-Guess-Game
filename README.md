@@ -13,3 +13,7 @@ After you win or lose, you may continue with a new word or quit the game.
 
 ## Technical Notes
 The base javascript (game.js) for the word game is created as a javascript object.  Functions outside the object handle listening for a keypress (to guess the word) or responding to button clicks (for entering your name, continuing or quitting the game).
+
+## Credits
+The background image is copied from:
+https://theartmad.com/wp-content/uploads/2015/10/Halloween-Ghost-Background.jpg
