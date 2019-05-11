@@ -33,13 +33,16 @@ var wordGame = {
         this.playerName =  "";
         this.numberWins = 0;
         this.numberLosses = 0;
-        this.wordList = ["vampire", "zombie", "witch", "ghoul", "ghost", "spooky", "wraith", "spirit", "phantom", "shadow"];
         this.updateDisplayPlayerNameDiv("visible");
         this.updateDisplayGameBoard("hidden");
         this.updateDisplayContinueYN("hidden");
     },
 
     setUp: function () {
+        // if the word list is empty, reset the word list
+        if (this.wordList.length < 1) { 
+            this.wordList = ["vampire", "zombie", "witch", "ghoul", "ghost", "spooky", "wraith", "spirit", "phantom", "shadow"];
+        }
         // set up the game with a new word
         // need to re-set a number of properties
         this.updateDisplayContinueYN("hidden");
@@ -163,13 +166,13 @@ var wordGame = {
         // win/loss condition is not yet working
         if (this.isSolved) {
             // if the word is solved!
-            this.gameInstructions = "YOU WIN!!  Way to go, " + this.playerName;
+            this.gameInstructions = "YOU WIN!!  Way to go, " + this.playerName + ".";
             this.numberWins++;
             this.updateWins();
             this.gameEnd();
         } else if (this.numberGuesses < 1) {
             // used all the guesses
-            this.gameInstructions = "You lost.  Better luck next time, " + this.playerName;
+            this.gameInstructions = "You lost.  Better luck next time, " + this.playerName + ".";
             this.numberLosses++;
             this.updateLosses();
             this.gameEnd();
