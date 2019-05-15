@@ -101,7 +101,7 @@ var wordGame = {
             var ltr = keyPressed.toUpperCase();
             // check if the letter is used or results in a correct or wrong guess
             var checkResult = this.checkLetter(ltr);
-            console.log(checkResult);
+            // console.log(checkResult);
             // use the result to update the game state
             if (checkResult === "USED") {
                 // no action
